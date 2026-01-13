@@ -1,9 +1,25 @@
 import { GoogleGenAI } from "@google/genai";
 import { DateInfo, AiAdvice } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Safe access helper
+const getApiKey = () => {
+  if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+    return process.env.API_KEY;
+  }
+  return "";
+};
+
+const apiKey = getApiKey();
+const ai = new GoogleGenAI({ apiKey });
 
 export const getDailyAdvice = async (dateInfo: DateInfo, topic: string): Promise<AiAdvice> => {
+  if (!apiKey) {
+    return {
+       text: "Vui lòng cấu hình biến môi trường API_KEY trong Vercel để sử dụng tính năng này.",
+       category: 'general'
+    };
+  }
+
   try {
     // Construct a culturally relevant prompt
     const prompt = `
